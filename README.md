@@ -5,6 +5,6 @@ Projeto criado para a disciplina de Arquiteturas de Computadores II EC 208 do In
 
 Membros do grupo:
 
-Bruno Balestra teste (brunobalestra@gec.inatel.br)
+Bruno Balestra de Carvalho Ferreira (brunobalestra@gec.inatel.br)
 Felipe de Cássio Rocha Santos (felipe.santos@gec.inatel.br)
 Matheus Oliveira (matheus.lage@gec.inatel.br)
