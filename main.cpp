@@ -5,12 +5,13 @@
 
 #define DEFAULT_FILENAME_MEMORY "memoria.txt"
 #define DEFAULT_FILENAME_INSTRUCTIONS "instrucoes.txt"
+#define MAX_FILENAME_SIZE 35
 
 using namespace std;
 
-void recarregar(FILE** txt, char* nomeArquivo);
+void reloadFile(FILE** txt, char* nomeArquivo);
 
-void cabecalho()
+void showMenuHeader()
 {
 	system("cls");
 	cout << "--------------------------------------------------------------------------------\n";
@@ -20,7 +21,7 @@ void cabecalho()
 	cout << "--------------------------------------------------------------------------------\n";
 }
 
-void mostrarStatusArquivo(FILE* file, char* filename)
+void showFileStatus(FILE* file, char* filename)
 {
 	if(file == NULL)
 	{
@@ -32,13 +33,13 @@ void mostrarStatusArquivo(FILE* file, char* filename)
 	}
 }
 
-void menuGerenciarArquivo(FILE* file, char* filename)
+void manageFileMenu(FILE* file, char* filename)
 {
 	char option_1;
-	cabecalho();
+	showMenuHeader();
 	cout << "\t\t\tGerenciar Arquivo\n";
 	cout << "--------------------------------------------------------------------------------\n\n";
-	mostrarStatusArquivo(file, filename);
+	showFileStatus(file, filename);
 	cout << "\t\t1 - Recarregar\n";
 	cout << "\t\t2 - Fechar arquivo" << endl;
 	cout << "\t\t3 - Alterar arquivo" << endl;
@@ -50,10 +51,10 @@ void menuGerenciarArquivo(FILE* file, char* filename)
 	switch(option_1)
 	{
 	case '1':
-		recarregar(&file, filename);
+		reloadFile(&file, filename);
 		break;
 	case '2':
-		cabecalho();
+		showMenuHeader();
 		cout << "\t\t\tFechar arquivo\n";
 		cout << "--------------------------------------------------------------------------------\n\n";
 		fclose(file);
@@ -62,22 +63,22 @@ void menuGerenciarArquivo(FILE* file, char* filename)
 		system("pause");
 		break;
 	case '3':
-		cabecalho();
+		showMenuHeader();
 		cout << "\t\t\tAlterar arquivo\n";
 		cout << "--------------------------------------------------------------------------------\n\n";
 		cout << "O sistema atualmente busca o arquivo '" << filename << "'.\n\n";
-		cout << "Digite o nome do novo arquivo com a extensão que o sistema deve buscar\n>";
-		for(int i = 0; i < 35; i++)
+		cout << "Digite o novo nome do arquivo (com a extensão) que o sistema deve buscar\n>";
+		cout << "Exemplo: 'arquivo.txt' sem apóstrofos.\n>";
+		for(int i = 0; i < MAX_FILENAME_SIZE; i++)
 			filename[i] = 0;
 		cin.clear();
 		cin.sync();
-		cin.getline(filename, 35);
+		cin.getline(filename, MAX_FILENAME_SIZE);
 		cout << "\nNome do arquivo que o sistema busca alterado para '" << filename << "'.\n\n";
-		recarregar(&file, filename);
+		reloadFile(&file, filename);
 		system("pause");
 		break;
 	case '9':
-		system("cls");
 		break;
 	default:
 		cout << "\tOpção inválida\n\n";
@@ -91,23 +92,23 @@ int main()
 
 	FILE* memFile = NULL;
 	FILE* instrFile = NULL;
-	char memFilename[35] = DEFAULT_FILENAME_MEMORY;
-	char instrFilename[35] = DEFAULT_FILENAME_INSTRUCTIONS;
+	char memFilename[MAX_FILENAME_SIZE] = DEFAULT_FILENAME_MEMORY;
+	char instrFilename[MAX_FILENAME_SIZE] = DEFAULT_FILENAME_INSTRUCTIONS;
 
 	setlocale(LC_ALL, "Portuguese");
 
-	memFile = fopen(memFilename, "r+");
-	instrFile = fopen(instrFilename, "r+");
+	reloadFile(&memFile, memFilename);
+	reloadFile(&instrFile, instrFilename);
 
 	int i;
 
 	do
 	{
-		cabecalho();
+		showMenuHeader();
 		cout << "\t\t\tMenu Principal\n";
 		cout << "--------------------------------------------------------------------------------\n\n";
-		mostrarStatusArquivo(memFile, memFilename);
-		mostrarStatusArquivo(instrFile, instrFilename);
+		showFileStatus(memFile, memFilename);
+		showFileStatus(instrFile, instrFilename);
 		cout << "\t\t1 - Gerenciar arquivo\n";
 		cout << "\t\t2 - Executar" << endl;
 		cout << "\n\t\t9 - Sair" << endl;
@@ -120,13 +121,13 @@ int main()
 		case '1':
 			do
 			{
-				cabecalho();
+				showMenuHeader();
 				cout << "\t\t\tGerenciar Arquivo\n";
 				cout << "--------------------------------------------------------------------------------\n\n";
-				mostrarStatusArquivo(memFile, memFilename);
-				mostrarStatusArquivo(instrFile, instrFilename);
-				cout << "\t\t1 - Arquivo de memória\n";
-				cout << "\t\t2 - Arquivo de instruções" << endl;
+				showFileStatus(memFile, memFilename);
+				showFileStatus(instrFile, instrFilename);
+				cout << "\t\t1 - Arquivo de memória ('" << memFilename << "')\n";
+				cout << "\t\t2 - Arquivo de instruções ('" << instrFilename << "')" << endl;
 				cout << "\n\t\t9 - Voltar ao Menu Principal" << endl;
 				cout << "\nPor favor, digite a opção desejada\n> ";
 				cin.clear();
@@ -135,13 +136,12 @@ int main()
 				switch(option_2)
 				{
 				case '1':
-					menuGerenciarArquivo(memFile, memFilename);
+					manageFileMenu(memFile, memFilename);
 					break;
 				case '2':
-					menuGerenciarArquivo(instrFile, instrFilename);
+					manageFileMenu(instrFile, instrFilename);
 					break;
 				case '9':
-					system("cls");
 					break;
 				default:
 					cout << "\tOpção inválida\n\n";
@@ -150,10 +150,15 @@ int main()
 			}
 			while(option_2 != '9');
 			break;
-
 		case '2':
-			cabecalho();
+			showMenuHeader();
 			cout << "\t\t\tExecução\n";
+			cout << "--------------------------------------------------------------------------------\n";
+			system("pause");
+			break;
+		case '3':
+			showMenuHeader();
+			cout << "\t\t\tListagem da memória\n";
 			cout << "--------------------------------------------------------------------------------\n";
 			system("pause");
 			break;
@@ -170,7 +175,7 @@ int main()
 	return 0;
 }
 
-void recarregar(FILE** file, char* filename)
+void reloadFile(FILE** file, char* filename)
 {
 	fclose(*file);
 	*file = NULL;
