@@ -1,7 +1,0 @@
-load M10 na R0
-load M11 na R1
-load M12 na R2
-add R0 e R1 na R2
-sub R2 e R0 na R3
-store R2 na M10
-store R3 na M1
