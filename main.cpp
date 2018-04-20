@@ -55,7 +55,7 @@ Detalhes do set de instrução
 
 #define DEFAULT_FILENAME_MEMORY "memoria.txt"
 #define DEFAULT_FILENAME_INSTRUCTIONS "instrucoes.txt"
-#define MAX_FILENAME_SIZE 35
+#define MAX_FILENAME_SIZE 32
 
 #define MAX_PROG_MEMORY 32
 #define MAX_DATA_MEMORY 32
@@ -83,93 +83,23 @@ int instructionsQuantity;
 // Prototipos
 void decode(void);
 void execute(void);
+void runInterpreter();
+void cleanMemory();
 
-// Relacionado a interface
-void reloadFile(FILE** txt, char* nomeArquivo);
-void executeInterpreter();
-void fileToProgMemory(FILE* file);
-void fileToDataMemory(FILE* file);
+
+// Prototipos de funcoes relacionadas a interface
+void showMenuHeader();
+void showFileStatus(FILE*, char*);
 void showProgMemory();
 void showDataMemory();
-
-void showMenuHeader()
-{
-	system("cls");
-	cout << "--------------------------------------------------------------------------------\n";
-	cout << "\tEC 208 - Arquitetura de Computadores II\n";
-	cout << "\tProjeto: Máquina Virtual/ Interpretador de Alto Nível\n";
-	cout << "\tAutores: Bruno Balestra/ Felipe Santos/ Matheus Oliveira\n";
-	cout << "--------------------------------------------------------------------------------\n";
-}
-
-void showFileStatus(FILE* file, char* filename)
-{
-	if(file == NULL)
-	{
-		cout << "\tArquivo '" << filename << "' não carregado ou não encontrado.\n\n";
-	}
-	else
-	{
-		cout << "\tArquivo '" << filename << "' carregado.\n\n";
-	}
-}
-
-void manageFileMenu(FILE* file, char* filename)
-{
-	char option_1;
-	showMenuHeader();
-	cout << "\t\t\tGerenciar Arquivo\n";
-	cout << "--------------------------------------------------------------------------------\n\n";
-	showFileStatus(file, filename);
-	cout << "\t\t1 - Recarregar\n";
-	cout << "\t\t2 - Fechar arquivo" << endl;
-	cout << "\t\t3 - Alterar arquivo" << endl;
-	cout << "\n\t\t9 - Voltar ao Menu Principal" << endl;
-	cout << "\nPor favor, digite a opção desejada\n> ";
-	cin.clear();
-	cin.sync();
-	cin >> option_1;
-	switch(option_1)
-	{
-	case '1':
-		reloadFile(&file, filename);
-		break;
-	case '2':
-		showMenuHeader();
-		cout << "\t\t\tFechar arquivo\n";
-		cout << "--------------------------------------------------------------------------------\n\n";
-		fclose(file);
-		file = NULL;
-		cout << "Arquivo '" << filename << "' fechado.\n\n";
-		system("pause");
-		break;
-	case '3':
-		showMenuHeader();
-		cout << "\t\t\tAlterar arquivo\n";
-		cout << "--------------------------------------------------------------------------------\n\n";
-		cout << "O sistema atualmente busca o arquivo '" << filename << "'.\n\n";
-		cout << "Digite o novo nome do arquivo (com a extensão) que o sistema deve buscar\n>";
-		cout << "Exemplo: 'arquivo.txt' sem apóstrofos.\n>";
-		for(int i = 0; i < MAX_FILENAME_SIZE; i++)
-			filename[i] = 0;
-		cin.clear();
-		cin.sync();
-		cin.getline(filename, MAX_FILENAME_SIZE);
-		cout << "\nNome do arquivo que o sistema busca alterado para '" << filename << "'.\n\n";
-		reloadFile(&file, filename);
-		system("pause");
-		break;
-	case '9':
-		break;
-	default:
-		cout << "\tOpção inválida\n\n";
-		system("pause");
-	}
-}
+// Prototipos de funcoes relacionadas a arquivo
+void reloadFile(FILE**, char*);
+void fileToProgMemory(FILE*);
+void fileToDataMemory(FILE*);
 
 int main()
 {
-	char option_1, option_2;
+	char option_1, option_2, option_3;
 
 	FILE* memFile = NULL;
 	FILE* instrFile = NULL;
@@ -180,6 +110,8 @@ int main()
 
 	reloadFile(&memFile, memFilename);
 	reloadFile(&instrFile, instrFilename);
+
+	cleanMemory();
 
 	do
 	{
@@ -192,6 +124,7 @@ int main()
 		cout << "\t\t2 - Carregar do arquivo para a memória" << endl;
 		cout << "\t\t3 - Listar memória" << endl;
 		cout << "\t\t4 - Executar" << endl;
+		cout << "\t\t5 - Limpar memória" << endl;
 		cout << "\n\t\t9 - Sair" << endl;
 		cout << "\nPor favor, digite a opção desejada\n> ";
 		cin.clear();
@@ -217,10 +150,112 @@ int main()
 				switch(option_2)
 				{
 				case '1':
-					manageFileMenu(memFile, memFilename);
+					do
+					{
+						showMenuHeader();
+						cout << "\t\t\tGerenciar Arquivo\n";
+						cout << "--------------------------------------------------------------------------------\n\n";
+						showFileStatus(memFile, memFilename);
+						cout << "\t\t1 - Recarregar\n";
+						cout << "\t\t2 - Fechar arquivo" << endl;
+						cout << "\t\t3 - Alterar arquivo" << endl;
+						cout << "\n\t\t9 - Voltar ao Menu anterior" << endl;
+						cout << "\nPor favor, digite a opção desejada\n> ";
+						cin.clear();
+						cin.sync();
+						cin >> option_3;
+						switch(option_3)
+						{
+						case '1':
+							reloadFile(&memFile, memFilename);
+							break;
+						case '2':
+							showMenuHeader();
+							cout << "\t\t\tFechar arquivo\n";
+							cout << "--------------------------------------------------------------------------------\n\n";
+							fclose(memFile);
+							memFile = NULL;
+							cout << "Arquivo '" << memFilename << "' fechado.\n\n";
+							system("pause");
+							break;
+						case '3':
+							showMenuHeader();
+							cout << "\t\t\tAlterar arquivo\n";
+							cout << "--------------------------------------------------------------------------------\n\n";
+							cout << "O sistema atualmente busca o arquivo '" << memFilename << "'.\n\n";
+							cout << "Digite o novo nome do arquivo (com a extensão) que o sistema deve buscar\n";
+							cout << "Exemplo: 'arquivo.txt' sem apóstrofos.\n>";
+							for(int i = 0; i < MAX_FILENAME_SIZE; i++)
+								memFilename[i] = 0;
+							cin.clear();
+							cin.sync();
+							cin.getline(memFilename, MAX_FILENAME_SIZE);
+							cout << "\nNome do arquivo que o sistema busca alterado para '" << memFilename << "'.\n\n";
+							reloadFile(&memFile, memFilename);
+							system("pause");
+							break;
+						case '9':
+							break;
+						default:
+							cout << "\tOpção inválida\n\n";
+							system("pause");
+						}
+					}
+					while(option_3 != '9');
 					break;
 				case '2':
-					manageFileMenu(instrFile, instrFilename);
+					do
+					{
+						showMenuHeader();
+						cout << "\t\t\tGerenciar Arquivo\n";
+						cout << "--------------------------------------------------------------------------------\n\n";
+						showFileStatus(instrFile, instrFilename);
+						cout << "\t\t1 - Recarregar\n";
+						cout << "\t\t2 - Fechar arquivo" << endl;
+						cout << "\t\t3 - Alterar arquivo" << endl;
+						cout << "\n\t\t9 - Voltar ao Menu anterior" << endl;
+						cout << "\nPor favor, digite a opção desejada\n> ";
+						cin.clear();
+						cin.sync();
+						cin >> option_3;
+						switch(option_3)
+						{
+						case '1':
+							reloadFile(&instrFile, instrFilename);
+							break;
+						case '2':
+							showMenuHeader();
+							cout << "\t\t\tFechar arquivo\n";
+							cout << "--------------------------------------------------------------------------------\n\n";
+							fclose(instrFile);
+							instrFile = NULL;
+							cout << "Arquivo '" << instrFilename << "' fechado.\n\n";
+							system("pause");
+							break;
+						case '3':
+							showMenuHeader();
+							cout << "\t\t\tAlterar arquivo\n";
+							cout << "--------------------------------------------------------------------------------\n\n";
+							cout << "O sistema atualmente busca o arquivo '" << instrFilename << "'.\n\n";
+							cout << "Digite o novo nome do arquivo (com a extensão) que o sistema deve buscar\n";
+							cout << "Exemplo: 'arquivo.txt' sem apóstrofos.\n>";
+							for(int i = 0; i < MAX_FILENAME_SIZE; i++)
+								instrFilename[i] = 0;
+							cin.clear();
+							cin.sync();
+							cin.getline(instrFilename, MAX_FILENAME_SIZE);
+							cout << "\nNome do arquivo que o sistema busca alterado para '" << instrFilename << "'.\n\n";
+							reloadFile(&instrFile, instrFilename);
+							system("pause");
+							break;
+						case '9':
+							break;
+						default:
+							cout << "\tOpção inválida\n\n";
+							system("pause");
+						}
+					}
+					while(option_3 != '9');
 					break;
 				case '9':
 					break;
@@ -232,6 +267,7 @@ int main()
 			while(option_2 != '9');
 			break;
 		case '2':
+			cleanMemory();
 			fileToProgMemory(instrFile);
 			fileToDataMemory(memFile);
 			break;
@@ -243,12 +279,6 @@ int main()
 			showProgMemory();
 			showDataMemory();
 
-			cout << "\n\t\tReg" << endl;
-			for(int i = 0; i < 10; i++)
-			{
-				cout << i << ":\t" << Reg[i] << endl;
-			}
-
 			cout << endl;
 
 			system("pause");
@@ -258,13 +288,24 @@ int main()
 			cout << "\t\t\tExecução\n";
 			cout << "--------------------------------------------------------------------------------\n";
 
-			executeInterpreter();
+			runInterpreter();
+
+			memFile = fopen(memFilename, "w+");
+
+			for(int i = 0; i < MAX_DATA_MEMORY; i++)
+			{
+				fprintf(memFile, "%d\n", DataMemory[i]);
+			}
 
 			cout << "Instruções executadas.\n\n";
 
+			reloadFile(&memFile, memFilename);
+
 			system("pause");
 			break;
-
+		case '5':
+			cleanMemory();
+			break;
 		case '9':
 			break;
 		default:
@@ -276,6 +317,28 @@ int main()
 	fclose(memFile);
 	fclose(instrFile);
 	return 0;
+}
+
+void showMenuHeader()
+{
+	system("cls");
+	cout << "--------------------------------------------------------------------------------\n";
+	cout << "\tEC 208 - Arquitetura de Computadores II\n";
+	cout << "\tProjeto: Máquina Virtual/ Interpretador de Alto Nível\n";
+	cout << "\tAutores: Bruno Balestra/ Felipe Santos/ Matheus Oliveira\n";
+	cout << "--------------------------------------------------------------------------------\n";
+}
+
+void showFileStatus(FILE* file, char* filename)
+{
+	if(file == NULL)
+	{
+		cout << "\tArquivo '" << filename << "' não carregado ou não encontrado.\n\n";
+	}
+	else
+	{
+		cout << "\tArquivo '" << filename << "' carregado.\n\n";
+	}
 }
 
 void reloadFile(FILE** file, char* filename)
@@ -338,9 +401,22 @@ void showDataMemory()
 	}
 }
 
-void executeInterpreter()
+void cleanMemory()
+{
+	for(int i = 0; i < MAX_PROG_MEMORY; i++)
+	{
+		ProgMemory[i] = 0;
+	}
+	for(int i = 0; i < MAX_DATA_MEMORY; i++)
+	{
+		DataMemory[i] = 0;
+	}
+}
+
+void runInterpreter()
 {
 	PC = 0;
+
 	for(int i = 0; i < 10; i++)
 	{
 		Reg[i] = 0;
