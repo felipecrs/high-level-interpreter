@@ -1,19 +1,19 @@
-/********************************************************************************
+9/********************************************************************************
 
-Detalhes do set de instrução
+Detalhes do set de instruÃ§Ã£o
 
-	Tamanho das instruções: 16 bits
+	Tamanho das instruÃ§Ãµes: 16 bits
 
-	Código das intruções:
+	CÃ³digo das intruÃ§Ãµes:
 
 		LOAD: 	00
 		STORE:	01
 		ADD: 	10
 		SUB: 	11
 
-	Instruções Tipo 1:
+	InstruÃ§Ãµes Tipo 1:
 
-		- Utilizado para operaçções aritméticas (soma, subtração, ...)
+		- Utilizado para operaÃ§Ã§Ãµes aritmÃ©ticas (soma, subtraÃ§Ã£o, ...)
 
              MSB                                      LSB
 
@@ -24,25 +24,25 @@ Detalhes do set de instrução
 
          - Exemplo: 0b0001000000010010 >>> |01|0000|0001|000010
 
-         	 	Realiza a soma (10 >> tipo da instrução) do registro 0 (0000
+         	 	Realiza a soma (10 >> tipo da instruÃ§Ã£o) do registro 0 (0000
  	 	 	 >> end. Reg 1) com o registro 1 (0001 >> end. Reg 2) e salva o resultado
  	 	 	 em registro 2 (000010 >> end. Reg Dest.)
 
 
-    Instruções Tipo 2:
+    InstruÃ§Ãµes Tipo 2:
 
-     	 - Uitlizado para operações de LOAD e STORE
+     	 - Uitlizado para operaÃ§Ãµes de LOAD e STORE
 
      	       MSB                        LSB
 
-     	 (Tipo instr.) (End Reg) (End Memória de dados)
+     	 (Tipo instr.) (End Reg) (End MemÃ³ria de dados)
 
 		    2 bits       4 bits        10 bits
 
    	   - Exemplo: 0b1000000000010010 >>> |00|0000|0000001010
 
-         	 	Realiza o LOAD (00 >> tipo da instrução) do endereço de
-			memória 10 (0000001010 >> end. Memória) para o registro 0
+         	 	Realiza o LOAD (00 >> tipo da instruÃ§Ã£o) do endereÃ§o de
+			memÃ³ria 10 (0000001010 >> end. MemÃ³ria) para o registro 0
 			(0000 >> end. Reg )
 
 ********************************************************************************/
@@ -121,12 +121,12 @@ int main()
 		showFileStatus(memFile, memFilename);
 		showFileStatus(instrFile, instrFilename);
 		cout << "\t\t1 - Gerenciar arquivo\n";
-		cout << "\t\t2 - Carregar do arquivo para a memória" << endl;
-		cout << "\t\t3 - Listar memória" << endl;
+		cout << "\t\t2 - Carregar do arquivo para a memÃ³ria" << endl;
+		cout << "\t\t3 - Listar memÃ³ria" << endl;
 		cout << "\t\t4 - Executar" << endl;
-		cout << "\t\t5 - Limpar memória" << endl;
+		cout << "\t\t5 - Limpar memÃ³ria" << endl;
 		cout << "\n\t\t9 - Sair" << endl;
-		cout << "\nPor favor, digite a opção desejada\n> ";
+		cout << "\nPor favor, digite a opÃ§Ã£o desejada\n> ";
 		cin.clear();
 		cin.sync();
 		cin >> option_1;
@@ -140,10 +140,10 @@ int main()
 				cout << "--------------------------------------------------------------------------------\n\n";
 				showFileStatus(memFile, memFilename);
 				showFileStatus(instrFile, instrFilename);
-				cout << "\t\t1 - Arquivo de memória ('" << memFilename << "')\n";
-				cout << "\t\t2 - Arquivo de instruções ('" << instrFilename << "')" << endl;
+				cout << "\t\t1 - Arquivo de memÃ³ria ('" << memFilename << "')\n";
+				cout << "\t\t2 - Arquivo de instruÃ§Ãµes ('" << instrFilename << "')" << endl;
 				cout << "\n\t\t9 - Voltar ao Menu Principal" << endl;
-				cout << "\nPor favor, digite a opção desejada\n> ";
+				cout << "\nPor favor, digite a opÃ§Ã£o desejada\n> ";
 				cin.clear();
 				cin.sync();
 				cin >> option_2;
@@ -160,7 +160,7 @@ int main()
 						cout << "\t\t2 - Fechar arquivo" << endl;
 						cout << "\t\t3 - Alterar arquivo" << endl;
 						cout << "\n\t\t9 - Voltar ao Menu anterior" << endl;
-						cout << "\nPor favor, digite a opção desejada\n> ";
+						cout << "\nPor favor, digite a opÃ§Ã£o desejada\n> ";
 						cin.clear();
 						cin.sync();
 						cin >> option_3;
@@ -183,8 +183,8 @@ int main()
 							cout << "\t\t\tAlterar arquivo\n";
 							cout << "--------------------------------------------------------------------------------\n\n";
 							cout << "O sistema atualmente busca o arquivo '" << memFilename << "'.\n\n";
-							cout << "Digite o novo nome do arquivo (com a extensão) que o sistema deve buscar\n";
-							cout << "Exemplo: 'arquivo.txt' sem apóstrofos.\n>";
+							cout << "Digite o novo nome do arquivo (com a extensÃ£o) que o sistema deve buscar\n";
+							cout << "Exemplo: 'arquivo.txt' sem apÃ³strofos.\n>";
 							for(int i = 0; i < MAX_FILENAME_SIZE; i++)
 								memFilename[i] = 0;
 							cin.clear();
@@ -197,7 +197,7 @@ int main()
 						case '9':
 							break;
 						default:
-							cout << "\tOpção inválida\n\n";
+							cout << "\tOpÃ§Ã£o invÃ¡lida\n\n";
 							system("pause");
 						}
 					}
@@ -214,7 +214,7 @@ int main()
 						cout << "\t\t2 - Fechar arquivo" << endl;
 						cout << "\t\t3 - Alterar arquivo" << endl;
 						cout << "\n\t\t9 - Voltar ao Menu anterior" << endl;
-						cout << "\nPor favor, digite a opção desejada\n> ";
+						cout << "\nPor favor, digite a opÃ§Ã£o desejada\n> ";
 						cin.clear();
 						cin.sync();
 						cin >> option_3;
@@ -237,8 +237,8 @@ int main()
 							cout << "\t\t\tAlterar arquivo\n";
 							cout << "--------------------------------------------------------------------------------\n\n";
 							cout << "O sistema atualmente busca o arquivo '" << instrFilename << "'.\n\n";
-							cout << "Digite o novo nome do arquivo (com a extensão) que o sistema deve buscar\n";
-							cout << "Exemplo: 'arquivo.txt' sem apóstrofos.\n>";
+							cout << "Digite o novo nome do arquivo (com a extensÃ£o) que o sistema deve buscar\n";
+							cout << "Exemplo: 'arquivo.txt' sem apÃ³strofos.\n>";
 							for(int i = 0; i < MAX_FILENAME_SIZE; i++)
 								instrFilename[i] = 0;
 							cin.clear();
@@ -251,7 +251,7 @@ int main()
 						case '9':
 							break;
 						default:
-							cout << "\tOpção inválida\n\n";
+							cout << "\tOpÃ§Ã£o invÃ¡lida\n\n";
 							system("pause");
 						}
 					}
@@ -260,7 +260,7 @@ int main()
 				case '9':
 					break;
 				default:
-					cout << "\tOpção inválida\n\n";
+					cout << "\tOpÃ§Ã£o invÃ¡lida\n\n";
 					system("pause");
 				}
 			}
@@ -273,7 +273,7 @@ int main()
 			break;
 		case '3':
 			showMenuHeader();
-			cout << "\t\t\tListagem da memória\n";
+			cout << "\t\t\tListagem da memÃ³ria\n";
 			cout << "--------------------------------------------------------------------------------\n";
 
 			showProgMemory();
@@ -285,7 +285,7 @@ int main()
 			break;
 		case '4':
 			showMenuHeader();
-			cout << "\t\t\tExecução\n";
+			cout << "\t\t\tExecuÃ§Ã£o\n";
 			cout << "--------------------------------------------------------------------------------\n";
 
 			runInterpreter();
@@ -297,7 +297,7 @@ int main()
 				fprintf(memFile, "%d\n", DataMemory[i]);
 			}
 
-			cout << "Instruções executadas.\n\n";
+			cout << "InstruÃ§Ãµes executadas.\n\n";
 
 			reloadFile(&memFile, memFilename);
 
@@ -309,7 +309,7 @@ int main()
 		case '9':
 			break;
 		default:
-			cout << "\tOpção inválida\n\n";
+			cout << "\tOpÃ§Ã£o invÃ¡lida\n\n";
 			system("pause");
 		}
 	}
@@ -324,7 +324,7 @@ void showMenuHeader()
 	system("cls");
 	cout << "--------------------------------------------------------------------------------\n";
 	cout << "\tEC 208 - Arquitetura de Computadores II\n";
-	cout << "\tProjeto: Máquina Virtual/ Interpretador de Alto Nível\n";
+	cout << "\tProjeto: MÃ¡quina Virtual/ Interpretador de Alto NÃ­vel\n";
 	cout << "\tAutores: Bruno Balestra/ Felipe Santos/ Matheus Oliveira\n";
 	cout << "--------------------------------------------------------------------------------\n";
 }
@@ -333,7 +333,7 @@ void showFileStatus(FILE* file, char* filename)
 {
 	if(file == NULL)
 	{
-		cout << "\tArquivo '" << filename << "' não carregado ou não encontrado.\n\n";
+		cout << "\tArquivo '" << filename << "' nÃ£o carregado ou nÃ£o encontrado.\n\n";
 	}
 	else
 	{
@@ -424,9 +424,9 @@ void runInterpreter()
 
 	while(PC < instructionsQuantity)
 	{
-		Instr = ProgMemory[PC]; // busca da instrução na linha do PC do bloco
+		Instr = ProgMemory[PC]; // busca da instruÃ§Ã£o na linha do PC do bloco
 		PC++;
-		decode();    // decodificação
+		decode();    // decodificaÃ§Ã£o
 		execute();
 	}
 }
