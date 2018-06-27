@@ -1,19 +1,19 @@
-9/********************************************************************************
+/********************************************************************************
 
-Detalhes do set de instru√ß√£o
+Detalhes do set de instruÁ„o
 
-	Tamanho das instru√ß√µes: 16 bits
+	Tamanho das instruÁıes: 16 bits
 
-	C√≥digo das intru√ß√µes:
+	CÛdigo das intruÁıes:
 
 		LOAD: 	00
 		STORE:	01
 		ADD: 	10
 		SUB: 	11
 
-	Instru√ß√µes Tipo 1:
+	InstruÁıes Tipo 1:
 
-		- Utilizado para opera√ß√ß√µes aritm√©ticas (soma, subtra√ß√£o, ...)
+		- Utilizado para operaÁÁıes aritmÈticas (soma, subtraÁ„o, ...)
 
              MSB                                      LSB
 
@@ -24,25 +24,25 @@ Detalhes do set de instru√ß√£o
 
          - Exemplo: 0b0001000000010010 >>> |01|0000|0001|000010
 
-         	 	Realiza a soma (10 >> tipo da instru√ß√£o) do registro 0 (0000
+         	 	Realiza a soma (10 >> tipo da instruÁ„o) do registro 0 (0000
  	 	 	 >> end. Reg 1) com o registro 1 (0001 >> end. Reg 2) e salva o resultado
  	 	 	 em registro 2 (000010 >> end. Reg Dest.)
 
 
-    Instru√ß√µes Tipo 2:
+    InstruÁıes Tipo 2:
 
-     	 - Uitlizado para opera√ß√µes de LOAD e STORE
+     	 - Uitlizado para operaÁıes de LOAD e STORE
 
      	       MSB                        LSB
 
-     	 (Tipo instr.) (End Reg) (End Mem√≥ria de dados)
+     	 (Tipo instr.) (End Reg) (End MemÛria de dados)
 
 		    2 bits       4 bits        10 bits
 
    	   - Exemplo: 0b1000000000010010 >>> |00|0000|0000001010
 
-         	 	Realiza o LOAD (00 >> tipo da instru√ß√£o) do endere√ßo de
-			mem√≥ria 10 (0000001010 >> end. Mem√≥ria) para o registro 0
+         	 	Realiza o LOAD (00 >> tipo da instruÁ„o) do endereÁo de
+			memÛria 10 (0000001010 >> end. MemÛria) para o registro 0
 			(0000 >> end. Reg )
 
 ********************************************************************************/
@@ -59,6 +59,7 @@ Detalhes do set de instru√ß√£o
 
 #define MAX_PROG_MEMORY 32
 #define MAX_DATA_MEMORY 32
+#define MAX_CACHE_MEMORY 8
 
 using namespace std;
 
@@ -67,6 +68,12 @@ unsigned int ProgMemory[MAX_PROG_MEMORY];
 
 // Memoria de dados
 unsigned int DataMemory[MAX_DATA_MEMORY];
+
+struct CacheMemory {
+    unsigned int data;
+    unsigned int address;
+    bool valid;
+} cacheDataMemory [MAX_CACHE_MEMORY];
 
 // Registradores
 unsigned int PC;
@@ -81,10 +88,14 @@ unsigned int Reg[10];
 int instructionsQuantity;
 
 // Prototipos
-void decode(void);
-void execute(void);
+void decode();
+void execute();
 void runInterpreter();
 void cleanMemory();
+
+unsigned int getData(unsigned int address);
+void updateCache(unsigned int address);
+void saveData(unsigned int address, unsigned int data);
 
 
 // Prototipos de funcoes relacionadas a interface
@@ -121,12 +132,12 @@ int main()
 		showFileStatus(memFile, memFilename);
 		showFileStatus(instrFile, instrFilename);
 		cout << "\t\t1 - Gerenciar arquivo\n";
-		cout << "\t\t2 - Carregar do arquivo para a mem√≥ria" << endl;
-		cout << "\t\t3 - Listar mem√≥ria" << endl;
+		cout << "\t\t2 - Carregar do arquivo para a memÛria" << endl;
+		cout << "\t\t3 - Listar memÛria" << endl;
 		cout << "\t\t4 - Executar" << endl;
-		cout << "\t\t5 - Limpar mem√≥ria" << endl;
+		cout << "\t\t5 - Limpar memÛria" << endl;
 		cout << "\n\t\t9 - Sair" << endl;
-		cout << "\nPor favor, digite a op√ß√£o desejada\n> ";
+		cout << "\nPor favor, digite a opÁ„o desejada\n> ";
 		cin.clear();
 		cin.sync();
 		cin >> option_1;
@@ -140,10 +151,10 @@ int main()
 				cout << "--------------------------------------------------------------------------------\n\n";
 				showFileStatus(memFile, memFilename);
 				showFileStatus(instrFile, instrFilename);
-				cout << "\t\t1 - Arquivo de mem√≥ria ('" << memFilename << "')\n";
-				cout << "\t\t2 - Arquivo de instru√ß√µes ('" << instrFilename << "')" << endl;
+				cout << "\t\t1 - Arquivo de memÛria ('" << memFilename << "')\n";
+				cout << "\t\t2 - Arquivo de instruÁıes ('" << instrFilename << "')" << endl;
 				cout << "\n\t\t9 - Voltar ao Menu Principal" << endl;
-				cout << "\nPor favor, digite a op√ß√£o desejada\n> ";
+				cout << "\nPor favor, digite a opÁ„o desejada\n> ";
 				cin.clear();
 				cin.sync();
 				cin >> option_2;
@@ -160,7 +171,7 @@ int main()
 						cout << "\t\t2 - Fechar arquivo" << endl;
 						cout << "\t\t3 - Alterar arquivo" << endl;
 						cout << "\n\t\t9 - Voltar ao Menu anterior" << endl;
-						cout << "\nPor favor, digite a op√ß√£o desejada\n> ";
+						cout << "\nPor favor, digite a opÁ„o desejada\n> ";
 						cin.clear();
 						cin.sync();
 						cin >> option_3;
@@ -183,8 +194,8 @@ int main()
 							cout << "\t\t\tAlterar arquivo\n";
 							cout << "--------------------------------------------------------------------------------\n\n";
 							cout << "O sistema atualmente busca o arquivo '" << memFilename << "'.\n\n";
-							cout << "Digite o novo nome do arquivo (com a extens√£o) que o sistema deve buscar\n";
-							cout << "Exemplo: 'arquivo.txt' sem ap√≥strofos.\n>";
+							cout << "Digite o novo nome do arquivo (com a extens„o) que o sistema deve buscar\n";
+							cout << "Exemplo: 'arquivo.txt' sem apÛstrofos.\n>";
 							for(int i = 0; i < MAX_FILENAME_SIZE; i++)
 								memFilename[i] = 0;
 							cin.clear();
@@ -197,7 +208,7 @@ int main()
 						case '9':
 							break;
 						default:
-							cout << "\tOp√ß√£o inv√°lida\n\n";
+							cout << "\tOpÁ„o inv·lida\n\n";
 							system("pause");
 						}
 					}
@@ -214,7 +225,7 @@ int main()
 						cout << "\t\t2 - Fechar arquivo" << endl;
 						cout << "\t\t3 - Alterar arquivo" << endl;
 						cout << "\n\t\t9 - Voltar ao Menu anterior" << endl;
-						cout << "\nPor favor, digite a op√ß√£o desejada\n> ";
+						cout << "\nPor favor, digite a opÁ„o desejada\n> ";
 						cin.clear();
 						cin.sync();
 						cin >> option_3;
@@ -237,8 +248,8 @@ int main()
 							cout << "\t\t\tAlterar arquivo\n";
 							cout << "--------------------------------------------------------------------------------\n\n";
 							cout << "O sistema atualmente busca o arquivo '" << instrFilename << "'.\n\n";
-							cout << "Digite o novo nome do arquivo (com a extens√£o) que o sistema deve buscar\n";
-							cout << "Exemplo: 'arquivo.txt' sem ap√≥strofos.\n>";
+							cout << "Digite o novo nome do arquivo (com a extens„o) que o sistema deve buscar\n";
+							cout << "Exemplo: 'arquivo.txt' sem apÛstrofos.\n>";
 							for(int i = 0; i < MAX_FILENAME_SIZE; i++)
 								instrFilename[i] = 0;
 							cin.clear();
@@ -251,7 +262,7 @@ int main()
 						case '9':
 							break;
 						default:
-							cout << "\tOp√ß√£o inv√°lida\n\n";
+							cout << "\tOpÁ„o inv·lida\n\n";
 							system("pause");
 						}
 					}
@@ -260,7 +271,7 @@ int main()
 				case '9':
 					break;
 				default:
-					cout << "\tOp√ß√£o inv√°lida\n\n";
+					cout << "\tOpÁ„o inv·lida\n\n";
 					system("pause");
 				}
 			}
@@ -273,7 +284,7 @@ int main()
 			break;
 		case '3':
 			showMenuHeader();
-			cout << "\t\t\tListagem da mem√≥ria\n";
+			cout << "\t\t\tListagem da memÛria\n";
 			cout << "--------------------------------------------------------------------------------\n";
 
 			showProgMemory();
@@ -285,7 +296,7 @@ int main()
 			break;
 		case '4':
 			showMenuHeader();
-			cout << "\t\t\tExecu√ß√£o\n";
+			cout << "\t\t\tExecuÁ„o\n";
 			cout << "--------------------------------------------------------------------------------\n";
 
 			runInterpreter();
@@ -297,7 +308,7 @@ int main()
 				fprintf(memFile, "%d\n", DataMemory[i]);
 			}
 
-			cout << "Instru√ß√µes executadas.\n\n";
+			cout << "InstruÁıes executadas.\n\n";
 
 			reloadFile(&memFile, memFilename);
 
@@ -309,7 +320,7 @@ int main()
 		case '9':
 			break;
 		default:
-			cout << "\tOp√ß√£o inv√°lida\n\n";
+			cout << "\tOpÁ„o inv·lida\n\n";
 			system("pause");
 		}
 	}
@@ -324,7 +335,7 @@ void showMenuHeader()
 	system("cls");
 	cout << "--------------------------------------------------------------------------------\n";
 	cout << "\tEC 208 - Arquitetura de Computadores II\n";
-	cout << "\tProjeto: M√°quina Virtual/ Interpretador de Alto N√≠vel\n";
+	cout << "\tProjeto: M·quina Virtual/ Interpretador de Alto NÌvel\n";
 	cout << "\tAutores: Bruno Balestra/ Felipe Santos/ Matheus Oliveira\n";
 	cout << "--------------------------------------------------------------------------------\n";
 }
@@ -333,7 +344,7 @@ void showFileStatus(FILE* file, char* filename)
 {
 	if(file == NULL)
 	{
-		cout << "\tArquivo '" << filename << "' n√£o carregado ou n√£o encontrado.\n\n";
+		cout << "\tArquivo '" << filename << "' n„o carregado ou n„o encontrado.\n\n";
 	}
 	else
 	{
@@ -397,7 +408,7 @@ void showDataMemory()
 	cout << "\n\tDataMemory\n";
 	for(int i = 0; i < MAX_DATA_MEMORY; i++)
 	{
-		cout << i << ":\t" << DataMemory[i] << endl;
+		cout << "TAG = [" << bitset<5>(i) << "] CONTE⁄DO = [" << DataMemory[i] << "]" << endl;
 	}
 }
 
@@ -424,9 +435,9 @@ void runInterpreter()
 
 	while(PC < instructionsQuantity)
 	{
-		Instr = ProgMemory[PC]; // busca da instru√ß√£o na linha do PC do bloco
+		Instr = ProgMemory[PC]; // busca da instruÁ„o na linha do PC do bloco
 		PC++;
-		decode();    // decodifica√ß√£o
+		decode();    // decodificaÁ„o
 		execute();
 	}
 }
@@ -475,11 +486,53 @@ void execute(void)
 	else if(InstrType == 0)
 	{
 		// Load
-		Reg[RegDest] = DataMemory[RegAddrMemory];
+		Reg[RegDest] = getData(RegAddrMemory);
 	}
 	else if(InstrType == 1)
 	{
 		// Store
-		DataMemory[RegAddrMemory] = Reg[RegSourceA];
+        saveData(RegAddrMemory, Reg[RegSourceA]);
 	}
+}
+
+void updateCache(unsigned int address) {
+    cout << "Atualizando cache (TAG de referÍncia = [" << bitset<5>(address) << "])..." << endl;
+    int initialAddress = address - MAX_CACHE_MEMORY-1/2;
+    int finalAddress = address + MAX_CACHE_MEMORY/2;
+    if(initialAddress < 0) {
+        initialAddress = 0;
+    } else if(finalAddress > MAX_DATA_MEMORY-1) {
+        int toMax = finalAddress - MAX_DATA_MEMORY-1;
+        initialAddress -= toMax;
+    }
+
+    cout << "TAG inicial = " <<  bitset<5>(initialAddress);
+    cout << "TAG final = " << bitset<5>(initialAddress + MAX_CACHE_MEMORY-1);
+    for (int i = 0; i < MAX_CACHE_MEMORY; ++i, ++initialAddress) {
+        cacheDataMemory[i].address = initialAddress;
+        cacheDataMemory[i].data = DataMemory[initialAddress];
+    }
+    cout << "Cache atualizada" << endl;
+}
+
+unsigned int getData(unsigned int address) {
+    cout << "Tentando buscar dados na cache (TAG = [" << bitset<5>(address) << "])... ";
+    for (auto &i : cacheDataMemory) {
+        if (i.address == address) {
+            cout << "HIT!" << endl;
+            cout << "Retornando CONTE⁄DO = [" << i.data << "]" << endl;
+            return i.data;
+        }
+    }
+    cout << "MISS!" << endl;
+    updateCache(address);
+    cout << "Retornando CONTE⁄DO = [" << DataMemory[address] << "]" << endl;
+    return DataMemory[address];
+}
+
+void saveData(unsigned int address, unsigned int data) {
+    cout << "Salvando dados na memÛria... ";
+    DataMemory[address] = data;
+    cout << "salvo" << endl;
+    updateCache(address);
 }
