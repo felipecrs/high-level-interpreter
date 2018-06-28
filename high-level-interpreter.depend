@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1530148208 source:c:\users\felip\documents\github\high-level-interpreter\main.cpp
+	<iostream>
+	<clocale>
+	<windows.h>
+	<stdio.h>
+	<bitset>
+

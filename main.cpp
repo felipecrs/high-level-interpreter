@@ -70,9 +70,10 @@ unsigned int ProgMemory[MAX_PROG_MEMORY];
 unsigned int DataMemory[MAX_DATA_MEMORY];
 
 struct CacheMemory {
+    bool valid; // 1 bit
+    unsigned int address; // 5 bits = log2(MAX_DATA_MEMORY)
     unsigned int data;
-    unsigned int address;
-    bool valid;
+
 } cacheDataMemory [MAX_CACHE_MEMORY];
 
 // Registradores
@@ -397,9 +398,9 @@ void fileToDataMemory(FILE* file)
 void showProgMemory()
 {
 	cout << "\n\tProgMemory\n";
-	for(int i = 0; i < MAX_PROG_MEMORY; i++)
+	for(int i = 0; i < instructionsQuantity; i++)
 	{
-		cout << i << ":\t" << bitset<16>(ProgMemory[i]) << endl;
+		cout << "ENDEREÇO = [" << i << "] : CONTEÚDO = [" << bitset<16>(ProgMemory[i]) << "]"<< endl;
 	}
 }
 
@@ -408,8 +409,9 @@ void showDataMemory()
 	cout << "\n\tDataMemory\n";
 	for(int i = 0; i < MAX_DATA_MEMORY; i++)
 	{
-		cout << "TAG = [" << bitset<5>(i) << "] CONTEÚDO = [" << DataMemory[i] << "]" << endl;
+		cout << "TAG = [" << bitset<5>(i) << "] : CONTEÚDO = [" << DataMemory[i] << "]" << endl;
 	}
+	cout << endl;
 }
 
 void cleanMemory()
@@ -426,20 +428,30 @@ void cleanMemory()
 
 void runInterpreter()
 {
+    cout << "Rodando...\n\n";
+    cout << "Limpando registradores... ";
 	PC = 0;
-
 	for(int i = 0; i < 10; i++)
 	{
 		Reg[i] = 0;
 	}
+	cout << "concluído\n\n";
+
+	updateCache(0);
+
+	showProgMemory();
+	showDataMemory();
 
 	while(PC < instructionsQuantity)
 	{
+	    cout << "\nExecutando instrução [" << PC << "] do tipo... ";
 		Instr = ProgMemory[PC]; // busca da instrução na linha do PC do bloco
 		PC++;
 		decode();    // decodificação
 		execute();
 	}
+
+	showDataMemory();
 }
 
 void decode(void)
@@ -476,28 +488,32 @@ void execute(void)
 	if(InstrType == 2)
 	{
 		// Soma
+		cout << "soma\n";
 		Reg[RegDest] = Reg[RegSourceA] + Reg[RegSourceB];
 	}
 	else if(InstrType == 3)
 	{
 		// Subtracao
+		cout << "subtração\n";
 		Reg[RegDest] = Reg[RegSourceA] - Reg[RegSourceB];
 	}
 	else if(InstrType == 0)
 	{
 		// Load
+		cout << "load\n";
 		Reg[RegDest] = getData(RegAddrMemory);
 	}
 	else if(InstrType == 1)
 	{
 		// Store
+		cout << "store\n";
         saveData(RegAddrMemory, Reg[RegSourceA]);
 	}
 }
 
 void updateCache(unsigned int address) {
     cout << "Atualizando cache (TAG de referência = [" << bitset<5>(address) << "])..." << endl;
-    int initialAddress = address - MAX_CACHE_MEMORY-1/2;
+    int initialAddress = address - (MAX_CACHE_MEMORY-1)/2;
     int finalAddress = address + MAX_CACHE_MEMORY/2;
     if(initialAddress < 0) {
         initialAddress = 0;
@@ -506,33 +522,43 @@ void updateCache(unsigned int address) {
         initialAddress -= toMax;
     }
 
-    cout << "TAG inicial = " <<  bitset<5>(initialAddress);
-    cout << "TAG final = " << bitset<5>(initialAddress + MAX_CACHE_MEMORY-1);
+    cout << "TAG inicial = [" <<  bitset<5>(initialAddress) << "]\t";
+    cout << "TAG final = [" << bitset<5>(initialAddress + MAX_CACHE_MEMORY-1) << "]\n";
     for (int i = 0; i < MAX_CACHE_MEMORY; ++i, ++initialAddress) {
         cacheDataMemory[i].address = initialAddress;
         cacheDataMemory[i].data = DataMemory[initialAddress];
+        cacheDataMemory[i].valid = true;
     }
-    cout << "Cache atualizada" << endl;
+    cout << "Cache atualizada.\n\n";
 }
 
 unsigned int getData(unsigned int address) {
     cout << "Tentando buscar dados na cache (TAG = [" << bitset<5>(address) << "])... ";
-    for (auto &i : cacheDataMemory) {
-        if (i.address == address) {
-            cout << "HIT!" << endl;
-            cout << "Retornando CONTEÚDO = [" << i.data << "]" << endl;
-            return i.data;
+    for (int i = 0; i < MAX_CACHE_MEMORY; ++i) {
+        if (cacheDataMemory[i].address == address) {
+            if (cacheDataMemory[i].valid) {
+                cout << "HIT!" << endl;
+                cout << "Retornando CONTEÚDO = [" << cacheDataMemory[i].data << "]" << endl;
+                return cacheDataMemory[i].data;
+            } else {
+                break;
+            }
         }
     }
-    cout << "MISS!" << endl;
+    cout << "MISS!\n\n";
     updateCache(address);
     cout << "Retornando CONTEÚDO = [" << DataMemory[address] << "]" << endl;
     return DataMemory[address];
 }
 
 void saveData(unsigned int address, unsigned int data) {
-    cout << "Salvando dados na memória... ";
+    cout << "Salvando dados na memória (TAG = [" << bitset<5>(address) << "])... ";
     DataMemory[address] = data;
+    for (int i = 0; i < MAX_CACHE_MEMORY; ++i) {
+        if (cacheDataMemory[i].address == address) {
+            cacheDataMemory[i].valid = false;
+            break;
+        }
+    }
     cout << "salvo" << endl;
-    updateCache(address);
 }
